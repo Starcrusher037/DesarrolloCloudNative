@@ -1,30 +1,13 @@
-FROM eclipse-temurin:22-jdk AS buildstage 
-
-RUN apt-get update && apt-get install -y maven
+# Usamos la imagen ligera de ejecución para Java 21
+FROM eclipse-temurin:21-jdk-jammy
 
 WORKDIR /app
 
-# Copiar la wallet al entorno de construcción
-COPY wallet /app/wallet
+# Copiamos el archivo .jar ejecutable que Maven ya generó con éxito en el paso anterior
+COPY target/*.jar app.jar
 
-# Recibir variables desde el pipeline
-ARG ORACLE_TNS_NAME
-ARG ORACLE_DB_USER
-ARG ORACLE_DB_PASSWORD
-
-# Convertir los ARG a variables de entorno para que Spring Boot y Maven las usen
-ENV ORACLE_TNS_NAME=${ORACLE_TNS_NAME}
-ENV ORACLE_DB_USER=${ORACLE_DB_USER}
-ENV ORACLE_DB_PASSWORD=${ORACLE_DB_PASSWORD}
-
-COPY pom.xml .
-COPY src /app/src
-RUN mvn clean package
-
-FROM eclipse-temurin:22-jdk
-
-COPY --from=buildstage /app/target/microservicio-1.0.0.jar /app/app.jar
-
+# Exponemos el puerto de red estándar de Spring Boot
 EXPOSE 8080
 
-CMD ["java", "-jar", "/app/app.jar"]
+# Comando para ejecutar la aplicación al encender el contenedor
+ENTRYPOINT ["java", "-jar", "app.jar"]
