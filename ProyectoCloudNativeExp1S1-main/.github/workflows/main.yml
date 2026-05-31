@@ -91,4 +91,3 @@ jobs:
               -e ORACLE_DB_PASSWORD="${{ secrets.ORACLE_DB_PASSWORD }}" \
               ${{ secrets.DOCKERHUB_USERNAME }}/my-app:latest
           EOF
-          
